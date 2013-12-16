@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.UUID;
 
+import com.google.glass.companion.CompanionConstants;
 import com.google.glass.companion.CompanionMessagingUtil;
 import com.google.glass.companion.GlassProtocol;
 import com.google.glass.companion.Proto;
@@ -41,37 +42,33 @@ public class MainActivity extends Activity {
 					
 					Log.d("JOE",Arrays.toString(d.getUuids()));
 					
+					socket = d.createRfcommSocketToServiceRecord(CompanionConstants.SECURE_UUID);
 					
-					for (ParcelUuid uuid : d.getUuids()){
-						socket = d.createRfcommSocketToServiceRecord(UUID.fromString(uuid.toString()));
-						
-						socket.connect();
-						
-						if (!socket.isConnected()){
-							Log.e("JOE","Could not connect");
-							
-						}
-						
-						OutputStream os = socket.getOutputStream();
-						
-						
-						if (os == null){
-							Log.e("JOE","Could not connect os is null");
-							
-						}
-						
-						// Envelope is the root of the message hierarchy.
-						Proto.Envelope envelope = CompanionMessagingUtil.newEnvelope();
-						// This example is for obtaining screenshot.
-						ScreenShot screenShot = new ScreenShot();
-						screenShot.startScreenshotRequestC2G = true;
-						envelope.screenshot = screenShot;
-						GlassProtocol.writeMessage(envelope, socket.getOutputStream());
-						Log.d("JOE","Wrote Message");
-						
-						os.close();
+					socket.connect();
+					
+					if (!socket.isConnected()){
+						Log.e("JOE","Could not connect");
 						
 					}
+					
+					OutputStream os = socket.getOutputStream();
+					
+					
+					if (os == null){
+						Log.e("JOE","Could not connect os is null");
+						
+					}
+					
+					// Envelope is the root of the message hierarchy.
+					Proto.Envelope envelope = CompanionMessagingUtil.newEnvelope();
+					// This example is for obtaining screenshot.
+					ScreenShot screenShot = new ScreenShot();
+					screenShot.startScreenshotRequestC2G = true;
+					envelope.screenshot = screenShot;
+					GlassProtocol.writeMessage(envelope, socket.getOutputStream());
+					Log.d("JOE","Wrote Message");
+					
+					os.close();
 				
 				
 				} catch (IOException e) {
