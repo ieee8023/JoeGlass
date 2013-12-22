@@ -14,15 +14,14 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
-        android:text="@string/hello_world" />
+        android:text="Welcome to JoeGlass! The Mirror API is too central. With mounting privacy concerns lets just talk directly with the Glasses!" />
 
     <Button
         android:id="@+id/button1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignRight="@+id/textView1"
-        android:layout_below="@+id/textView1"
-        android:layout_marginTop="16dp"
+        android:layout_below="@+id/textView2"
         android:text="Send To Glass" />
 
     <EditText
@@ -31,6 +30,7 @@
         android:layout_height="wrap_content"
         android:layout_alignBottom="@+id/button1"
         android:layout_alignLeft="@+id/textView1"
+        android:layout_alignTop="@+id/button1"
         android:layout_toLeftOf="@+id/button1"
         android:ems="10" >
 
@@ -42,9 +42,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/editText1"
-        android:layout_alignRight="@+id/button1"
         android:layout_below="@+id/button1"
         android:layout_marginTop="17dp"
+        android:layout_toLeftOf="@+id/button3"
         android:text="Take Screenshot" />
 
     <ImageView
@@ -52,8 +52,26 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/button2"
-        android:layout_alignRight="@+id/button2"
+        android:layout_alignParentRight="true"
         android:layout_below="@+id/button2"
         android:src="@drawable/ic_launcher" />
+
+    <Button
+        android:id="@+id/button3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/imageView1"
+        android:layout_alignParentRight="true"
+        android:text="Save to SD" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/textView1"
+        android:layout_alignRight="@+id/button1"
+        android:layout_below="@+id/textView1"
+        android:gravity="center"
+        android:textColor="#FF0000" />
 
 </RelativeLayout>

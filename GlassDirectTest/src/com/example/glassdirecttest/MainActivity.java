@@ -1,46 +1,23 @@
 package com.example.glassdirecttest;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.Arrays;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.List;
-import java.util.Set;
-import java.util.TimeZone;
-import java.util.UUID;
-
-import com.google.glass.companion.CompanionConstants;
-import com.google.glass.companion.CompanionMessagingUtil;
-import com.google.glass.companion.GlassConnection;
-import com.google.glass.companion.GlassConnection.GlassConnectionListener;
-import com.google.glass.companion.GlassMessagingUtil;
-import com.google.glass.companion.GlassProtocol;
-import com.google.glass.companion.Proto;
-import com.google.glass.companion.Proto.Envelope;
-import com.google.glass.companion.Proto.GlassInfoRequest;
-import com.google.glass.companion.Proto.ScreenShot;
-
-import android.net.Uri;
+import java.util.Random;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.ParcelUuid;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningAppProcessInfo;
 import android.app.ActivityManager.RunningServiceInfo;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothSocket;
-import android.bluetooth.BluetoothClass.Device;
 import android.content.Context;
-import android.content.Intent;
+import android.graphics.Bitmap;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends Activity {
@@ -56,15 +33,56 @@ public class MainActivity extends Activity {
 		//JoeMessageUtil.sendText("Title","body");
 
 		
+		testIfMyGlassRunning(); 
+
+		
+		
+		
 		Button buttonOne = (Button) findViewById(R.id.button1);
 		buttonOne.setOnClickListener(new Button.OnClickListener() {
 		    public void onClick(View v) {
 		           
-		    	EditText text = (EditText)findViewById(R.id.editText1);
+		    	TextView tv = (TextView) findViewById(R.id.textView2);
+		    	tv.setText("Connecting..");
+		    	tv.invalidate();
 		    	
-		    	Toast.makeText(MainActivity.context, "Sending to glass", Toast.LENGTH_LONG);
-		    	
-		    	JoeMessageUtil.sendText("Message Test",text.getText().toString());
+		    	new Thread(new Runnable() {
+					
+					@Override
+					public void run() {
+
+				    	EditText text = (EditText)findViewById(R.id.editText1);
+				    	
+				    	//Toast.makeText(MainActivity.context, "Sending to glass", Toast.LENGTH_LONG).show();
+				    	
+				    	try{
+				    		JoeMessageUtil.sendText("Message Test",text.getText().toString());
+				    		
+					    	MainActivity.context.runOnUiThread(new Runnable(){
+		                	    public void run(){
+		    						TextView tv = (TextView) findViewById(R.id.textView2);
+		    				    	tv.setText("");
+		    				    	tv.invalidate();
+		                	    }
+		                	});
+				    		
+				    		
+				    	}catch(final Exception e){
+				    		
+					    	MainActivity.context.runOnUiThread(new Runnable(){
+					    	    public void run(){
+									TextView tv = (TextView) MainActivity.context.findViewById(R.id.textView2);
+							    	tv.setText("Cannot connect: " + e.getMessage());
+							    	tv.invalidate();
+					    	    }
+					    	});
+				    	}
+				    	
+				    	
+
+				    	
+					}
+		    	}).start();
 		    }
 		});
 		
@@ -72,24 +90,107 @@ public class MainActivity extends Activity {
 		Button button2 = (Button) findViewById(R.id.button2);
 		button2.setOnClickListener(new Button.OnClickListener() {
 		    public void onClick(View v) {
-		          
-		    	Toast.makeText(MainActivity.context, "Taking Screenshot", Toast.LENGTH_LONG);
-		    	JoeMessageUtil.takePicture();
+		        
+				TextView tv = (TextView) findViewById(R.id.textView2);
+		    	tv.setText("Connecting..");
+		    	tv.invalidate();
+		    	//Toast.makeText(MainActivity.context, "Taking Screenshot", Toast.LENGTH_LONG).show();
 		    	
+		    	new Thread(new Runnable() {
+					
+					@Override
+					public void run() {
+						try{
+							
+							
+							JoeMessageUtil.takePicture();
+					    	MainActivity.context.runOnUiThread(new Runnable(){
+		                	    public void run(){
+		    						TextView tv = (TextView) findViewById(R.id.textView2);
+		    				    	tv.setText("");
+		    				    	tv.invalidate();
+		                	    }
+		                	});			    		
+				    	}catch(final Exception e){
+				    		
+					    	MainActivity.context.runOnUiThread(new Runnable(){
+					    	    public void run(){
+									TextView tv = (TextView) MainActivity.context.findViewById(R.id.textView2);
+							    	tv.setText("Cannot connect: " + e.getMessage());
+							    	tv.invalidate();
+					    	    }
+					    	});
+				    	}
+				    	
+					}
+				}).start();
 		    	
-		    	//scan for pictures
-		    	sendBroadcast(new Intent(
-		    			Intent.ACTION_MEDIA_MOUNTED,
-		    			            Uri.parse("file://" + Environment.getExternalStorageDirectory())));
+
+		    	
+		    }
+		});
+		
+		
+		Button button3 = (Button) findViewById(R.id.button3);
+		button3.setOnClickListener(new Button.OnClickListener() {
+		    public void onClick(View v) {
+                
+		    	if(JoeMessageUtil.recentImage != null){
+	                saveImage(JoeMessageUtil.recentImage);
+			    	
+			    	Toast.makeText(null, "Saved to SD", Toast.LENGTH_LONG).show();
+		    	}
+		    	
 		    }
 		});
 		
 		
 		
 		
-		
 	}
 
+	
+	
+	@Override
+	protected void onResume() {
+		
+
+		testIfMyGlassRunning();
+		
+		
+		
+		super.onResume();
+	}
+	
+	boolean myglassrunning = false;
+	
+	public void testIfMyGlassRunning(){
+		
+		
+		TextView tv = (TextView) findViewById(R.id.textView2);
+    	tv.setText("");
+	    ActivityManager am = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+	   // am.killBackgroundProcesses("com.google.glass.companion");
+	    List<RunningServiceInfo> pids = am.getRunningServices(9999);
+	    for (int i = 0; i < pids.size(); i++) {
+	        ActivityManager.RunningServiceInfo info = pids.get(i);
+	        //Log.d("JOE",info.service.getClassName());
+	        if (info.service.getClassName().equals("com.google.glass.companion.service.CompanionService")){
+	        	Log.d("JOE","MyGlass is running");
+	        	myglassrunning = true;
+	        	tv = (TextView) findViewById(R.id.textView2);
+	        	tv.setText("MyGlass is running. It blocks the Bluetooth channel needed to talk to glass.  In order to use this app please Force Stop or uninstall it.");
+	        	
+	        }
+	        
+	    }
+		
+		
+		
+	}
+	
+	
+	  
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
@@ -98,46 +199,34 @@ public class MainActivity extends Activity {
 	}
 
 	
+
+	
+
 	
 	
-	
-	
-	
-	public void killPackageProcesses(String packagename) {
-	    int pid = 0;
-	    ActivityManager am = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-	    List<RunningAppProcessInfo> pids = am.getRunningAppProcesses();
-	    for (int i = 0; i < pids.size(); i++) {
-	        ActivityManager.RunningAppProcessInfo info = pids.get(i);
-	        Log.d("JOE","process: " + info.processName);
-	        if (info.processName.equalsIgnoreCase(packagename)) {
-	        	Log.d("JOE","killing " + info.processName);
-	            pid = info.pid;
-	        }
+	private static void saveImage(Bitmap finalBitmap) {
+
+	    String root = Environment.getExternalStorageDirectory().toString();
+	    File myDir = new File(root + "/joeglass");    
+	    myDir.mkdirs();
+	    Random generator = new Random();
+	    int n = 10000;
+	    n = generator.nextInt(n);
+	    String fname = "Image-"+ n +".jpg";
+	    File file = new File (myDir, fname);
+	    if (file.exists ()) file.delete (); 
+	    try {
+	           FileOutputStream out = new FileOutputStream(file);
+	           finalBitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
+	           out.flush();
+	           out.close();
+
+	    } catch (Exception e) {
+	           e.printStackTrace();
 	    }
-	    android.os.Process.killProcess(pid);
-
 	}
 	
-	public void killService(String packagename) {
-	    int pid = 0;
-	    ActivityManager am = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-	    am.killBackgroundProcesses("com.google.glass.companion");
-//	    List<RunningServiceInfo> pids = am
-//	            .getRunningServices(9999);
-//	    for (int i = 0; i < pids.size(); i++) {
-//	        ActivityManager.RunningServiceInfo info = pids.get(i);
-//	        Log.d("JOE","service: " + info.service.getClassName());
-//	        if (info.service.getClassName().equalsIgnoreCase(packagename)) {
-//	        	Log.d("JOE","killing " + info.service.getClassName());
-//	            pid = info.pid;
-//	        }
-//	    }
-//	    android.os.Process.killProcess(pid);
-
-	}
 	
-
 	
 }
 

@@ -21,9 +21,15 @@ public class SendToGlass extends Activity {
 		
 		Log.d("JOE", "Sending message to phone: " + subject);
 		
-		JoeMessageUtil.sendText(subject, "<a href=\"" + text + "\">" + text + "</a>");
+		try {
+			JoeMessageUtil.sendText(subject, text);
+			Toast.makeText(this, "Sent to glass", Toast.LENGTH_LONG).show();
+		} catch (Exception e) {
+			Toast.makeText(this, "Error sending to glass", Toast.LENGTH_LONG).show();
+			e.printStackTrace();
+		}
 		
-		Toast.makeText(this, "Sent to glass", Toast.LENGTH_LONG);
+		
 		
 //		for(String s : intent.getExtras().keySet()){
 //			

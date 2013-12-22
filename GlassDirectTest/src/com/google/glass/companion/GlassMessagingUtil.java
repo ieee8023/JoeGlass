@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.glass.companion.CompanionMessagingUtil;
+import com.google.glass.companion.Proto.Command;
 import com.google.glass.companion.Proto.Envelope;
 import com.google.glass.companion.Proto.MotionEvent;
 import com.google.glass.companion.Proto.MotionEvent.PointerCoords;
@@ -130,7 +131,8 @@ public class GlassMessagingUtil {
         timelineItem.html = text;
         timelineItem.creationTime = now;
         timelineItem.modifiedTime = now;
-        timelineItem.sourceType = SourceType.COMPANIONWARE;
+        timelineItem.sourceType = SourceType.GLASSWARE;
+        timelineItem.speakableText = text;
         timelineItem.source = "Joe";
         timelineItem.isDeleted = false;
         envelope.timelineItem = new TimelineItem[] { timelineItem };

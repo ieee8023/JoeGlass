@@ -24,6 +24,7 @@ import android.os.Environment;
 import android.util.Log;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.google.glass.companion.CompanionMessagingUtil;
 import com.google.glass.companion.GlassConnection;
@@ -36,9 +37,9 @@ import com.google.glass.companion.Proto.ScreenShot;
 public class JoeMessageUtil {
 	
 	private static GlassConnection c = null;
+	public static Bitmap recentImage = null;
 	
-	
-	public static void sendText(String subject, String text) {
+	public static void sendText(String subject, String text) throws Exception{
 	
 		
 		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
@@ -58,7 +59,7 @@ public class JoeMessageUtil {
 	
 	
 	
-	public static void takePicture() {
+	public static void takePicture() throws Exception{
 		
 		// Envelope is the root of the message hierarchy.
 		Proto.Envelope envelope = CompanionMessagingUtil.newEnvelope();
@@ -66,14 +67,14 @@ public class JoeMessageUtil {
 		ScreenShot screenShot = new ScreenShot();
 		screenShot.startScreenshotRequestC2G = true;
 		envelope.screenshot = screenShot;
-		send(envelope);
+		send(envelope) ;
 		
 	}
 	
 	
 	
 
-	public static void send(Proto.Envelope envelope) {
+	public static void send(Proto.Envelope envelope) throws Exception{
 		
 		
 		Log.d("JOE","Sending Envelope");
@@ -84,32 +85,43 @@ public class JoeMessageUtil {
 			c.close();
 		}		
 		
-		Log.d("JOE","Creating Connection");
+		Log.d("JOE","Finding Glass");
+    	MainActivity.context.runOnUiThread(new Runnable(){
+    	    public void run(){
+				TextView tv = (TextView) MainActivity.context.findViewById(R.id.textView2);
+		    	tv.setText("Finding Glass");
+		    	tv.invalidate();
+    	    }
+    	});
+		
 		BluetoothDevice device = null;
 		
 		Set<BluetoothDevice> devices =  BluetoothAdapter.getDefaultAdapter().getBondedDevices();
 		
-		for (BluetoothDevice d : devices){
+		for (final BluetoothDevice d : devices){
 			if (d.getName().contains("Glass")){
 				
 				Log.d("JOE","Talking to " + d.getName());
 				
 				device = d;
+				
+		    	MainActivity.context.runOnUiThread(new Runnable(){
+		    	    public void run(){
+						TextView tv = (TextView) MainActivity.context.findViewById(R.id.textView2);
+				    	tv.setText("Found " + d.getName());
+				    	tv.invalidate();
+		    	    }
+		    	});
+				
 				}
 		}	
 		
+
 		
 		
 		c = new GlassConnection();
 		
-		try {
-			
-			c.connect(device);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
+		c.connect(device);
 		
 		
 		c.registerListener(new GlassConnectionListener() {
@@ -128,8 +140,8 @@ public class JoeMessageUtil {
 			
 			@Override
 			public void onReceivedEnvelope(Envelope envelope) {
-				Log.d("JOE - received", envelope.toString());
-				
+				//Log.d("JOE", envelope.toString());
+				Log.d("JOE", "onReceivedEnvelope");
 				
 				
 				if (envelope.screenshot != null) {
@@ -137,10 +149,20 @@ public class JoeMessageUtil {
 		                InputStream in = new ByteArrayInputStream(envelope.screenshot.screenshotBytesG2C);
 		                try {
 		                	
-		                	Bitmap  img = BitmapFactory.decodeStream(in);
+		                	final Bitmap img = BitmapFactory.decodeStream(in);
 		                	
-		                	ImageView v = (ImageView)MainActivity.context.findViewById(R.id.imageView1);
-		                    v.setImageBitmap(img);
+		                	
+		                	MainActivity.context.runOnUiThread(new Runnable(){
+		                	    public void run(){
+		                	        
+		                	    	ImageView v = (ImageView)MainActivity.context.findViewById(R.id.imageView1);
+				                    v.setImageBitmap(img);
+
+		                	    }
+		                	});
+		                	
+		                	
+		                    
 		                	
 		                } catch (Exception e) {
 		                    e.printStackTrace();
@@ -176,6 +198,14 @@ public class JoeMessageUtil {
 		});
 
 		
+    	MainActivity.context.runOnUiThread(new Runnable(){
+    	    public void run(){
+				TextView tv = (TextView) MainActivity.context.findViewById(R.id.textView2);
+		    	tv.setText("Writing Envlope");
+		    	tv.invalidate();
+    	    }
+    	});
+		
 		c.write(envelope);
 		
 		c.close();
@@ -184,31 +214,6 @@ public class JoeMessageUtil {
 		
 		
 	}
-
-
-	
-	private void SaveIamge(Bitmap finalBitmap) {
-
-	    String root = Environment.getExternalStorageDirectory().toString();
-	    File myDir = new File(root + "/saved_images");    
-	    myDir.mkdirs();
-	    Random generator = new Random();
-	    int n = 10000;
-	    n = generator.nextInt(n);
-	    String fname = "Image-"+ n +".jpg";
-	    File file = new File (myDir, fname);
-	    if (file.exists ()) file.delete (); 
-	    try {
-	           FileOutputStream out = new FileOutputStream(file);
-	           finalBitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
-	           out.flush();
-	           out.close();
-
-	    } catch (Exception e) {
-	           e.printStackTrace();
-	    }
-	}
-	
 	
 	
 
