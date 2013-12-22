@@ -31,7 +31,10 @@ import com.google.glass.companion.GlassConnection;
 import com.google.glass.companion.GlassMessagingUtil;
 import com.google.glass.companion.Proto;
 import com.google.glass.companion.GlassConnection.GlassConnectionListener;
+import com.google.glass.companion.Proto.CompanionInfo;
 import com.google.glass.companion.Proto.Envelope;
+import com.google.glass.companion.Proto.GlassInfoRequest;
+import com.google.glass.companion.Proto.GlassInfoResponse;
 import com.google.glass.companion.Proto.ScreenShot;
 
 public class JoeMessageUtil {
@@ -39,6 +42,21 @@ public class JoeMessageUtil {
 	private static GlassConnection c = null;
 	public static Bitmap recentImage = null;
 	
+	
+	
+	public static void sendInfoRequest() throws Exception{
+		
+        Envelope envelope2 = CompanionMessagingUtil.newEnvelope();
+        GlassInfoRequest glassInfoRequest = new GlassInfoRequest();
+        glassInfoRequest.requestBatteryLevel = true;
+        glassInfoRequest.requestStorageInfo = true;
+        glassInfoRequest.requestDeviceName = true;
+        glassInfoRequest.requestSoftwareVersion = true;
+       // glassInfoRequest.requestNeedSetup = true;
+        envelope2.glassInfoRequestC2G = glassInfoRequest;
+        send(envelope2);
+	}
+
 	public static void sendText(String subject, String text) throws Exception{
 	
 		
@@ -140,23 +158,23 @@ public class JoeMessageUtil {
 			
 			@Override
 			public void onReceivedEnvelope(Envelope envelope) {
-				//Log.d("JOE", envelope.toString());
-				Log.d("JOE", "onReceivedEnvelope");
 				
+				Log.d("JOE", "=============onReceivedEnvelope");
+				Log.d("JOE", envelope.toString());
 				
 				if (envelope.screenshot != null) {
 		            if (envelope.screenshot.screenshotBytesG2C != null) {
 		                InputStream in = new ByteArrayInputStream(envelope.screenshot.screenshotBytesG2C);
 		                try {
 		                	
-		                	final Bitmap img = BitmapFactory.decodeStream(in);
+		                	recentImage = BitmapFactory.decodeStream(in);
 		                	
 		                	
 		                	MainActivity.context.runOnUiThread(new Runnable(){
 		                	    public void run(){
 		                	        
 		                	    	ImageView v = (ImageView)MainActivity.context.findViewById(R.id.imageView1);
-				                    v.setImageBitmap(img);
+				                    v.setImageBitmap(recentImage);
 
 		                	    }
 		                	});
@@ -168,6 +186,34 @@ public class JoeMessageUtil {
 		                    e.printStackTrace();
 		                }
 		            }
+		        }
+				
+			 if (envelope.glassInfoResponseG2C != null) {
+		            final GlassInfoResponse response = envelope.glassInfoResponseG2C;
+
+			    	MainActivity.context.runOnUiThread(new Runnable(){
+			    	    public void run(){
+			    	    	
+				            String info = "";
+				            info += "Device name: " + response.deviceName + "\n";
+				            info += "Battery: " + response.batteryLevel + "%" + "\n";
+				            info += "Software: " + response.softwareVersion + "\n";
+				            info += "NeedSetup: " + response.needSetup + "\n";
+				            info += "Storage: " + response.externalStorageAvailableBytes/1000/1000 + "/" + response.externalStorageTotalBytes/1000/1000
+				                    + " MB available";
+			    	    				    	    	
+							TextView tv = (TextView) MainActivity.context.findViewById(R.id.textView3);
+					    	tv.setText(info);
+					    	tv.invalidate();
+			    	    }
+			    	});
+		            
+		            
+		        }
+		        if (envelope.companionInfo != null) {
+		            CompanionInfo companionInfo = envelope.companionInfo;
+		            String log = companionInfo.responseLog;
+		            System.out.println(log);
 		        }
 				
 			

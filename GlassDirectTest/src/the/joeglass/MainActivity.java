@@ -4,6 +4,11 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.util.List;
 import java.util.Random;
+
+import com.google.glass.companion.CompanionMessagingUtil;
+import com.google.glass.companion.Proto.Envelope;
+import com.google.glass.companion.Proto.GlassInfoRequest;
+
 import android.os.Bundle;
 import android.os.Environment;
 import android.app.Activity;
@@ -33,9 +38,15 @@ public class MainActivity extends Activity {
 		//JoeMessageUtil.sendText("Title","body");
 
 		
-		testIfMyGlassRunning(); 
+		if (!myGlassRunning()){ 
 
-		
+			try {
+				JoeMessageUtil.sendInfoRequest();
+			} catch (Exception e1) {
+				
+				e1.printStackTrace();
+			}
+		}
 		
 		
 		Button buttonOne = (Button) findViewById(R.id.button1);
@@ -136,10 +147,44 @@ public class MainActivity extends Activity {
 		    public void onClick(View v) {
                 
 		    	if(JoeMessageUtil.recentImage != null){
-	                saveImage(JoeMessageUtil.recentImage);
-			    	
-			    	Toast.makeText(null, "Saved to SD", Toast.LENGTH_LONG).show();
+		    		
+			    	MainActivity.context.runOnUiThread(new Runnable(){
+			    	    public void run(){
+							TextView tv = (TextView) MainActivity.context.findViewById(R.id.textView2);
+					    	tv.setText("Saving...");
+					    	tv.invalidate();
+			    	    }
+			    	});
+		    		
+		    		
+		    		try{
+		                final String loc = saveImage(JoeMessageUtil.recentImage);
+				    	
+				    	MainActivity.context.runOnUiThread(new Runnable(){
+				    	    public void run(){
+								TextView tv = (TextView) MainActivity.context.findViewById(R.id.textView2);
+						    	tv.setText("Saved to " + loc);
+						    	tv.invalidate();
+				    	    }
+				    	});
+		    		}catch (final Exception e){
+		    			
+				    	MainActivity.context.runOnUiThread(new Runnable(){
+				    	    public void run(){
+								TextView tv = (TextView) MainActivity.context.findViewById(R.id.textView2);
+						    	tv.setText("Error saving: " + e.getMessage());
+						    	tv.invalidate();
+				    	    }
+				    	});
+		    		}
 		    	}
+		    	MainActivity.context.runOnUiThread(new Runnable(){
+		    	    public void run(){
+						TextView tv = (TextView) MainActivity.context.findViewById(R.id.textView2);
+				    	tv.setText("Take a screenshot first");
+				    	tv.invalidate();
+		    	    }
+		    	});
 		    	
 		    }
 		});
@@ -155,7 +200,7 @@ public class MainActivity extends Activity {
 	protected void onResume() {
 		
 
-		testIfMyGlassRunning();
+		myGlassRunning();
 		
 		
 		
@@ -164,7 +209,7 @@ public class MainActivity extends Activity {
 	
 	boolean myglassrunning = false;
 	
-	public void testIfMyGlassRunning(){
+	public boolean myGlassRunning(){
 		
 		
 		TextView tv = (TextView) findViewById(R.id.textView2);
@@ -180,12 +225,12 @@ public class MainActivity extends Activity {
 	        	myglassrunning = true;
 	        	tv = (TextView) findViewById(R.id.textView2);
 	        	tv.setText("MyGlass is running. It blocks the Bluetooth channel needed to talk to glass.  In order to use this app please Force Stop or uninstall it.");
-	        	
+	        	return true;
 	        }
 	        
 	    }
 		
-		
+		return false;
 		
 	}
 	
@@ -204,7 +249,7 @@ public class MainActivity extends Activity {
 
 	
 	
-	private static void saveImage(Bitmap finalBitmap) {
+	private static String saveImage(Bitmap finalBitmap) throws Exception{
 
 	    String root = Environment.getExternalStorageDirectory().toString();
 	    File myDir = new File(root + "/joeglass");    
@@ -215,15 +260,12 @@ public class MainActivity extends Activity {
 	    String fname = "Image-"+ n +".jpg";
 	    File file = new File (myDir, fname);
 	    if (file.exists ()) file.delete (); 
-	    try {
-	           FileOutputStream out = new FileOutputStream(file);
-	           finalBitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
-	           out.flush();
-	           out.close();
+       FileOutputStream out = new FileOutputStream(file);
+       finalBitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
+       out.flush();
+       out.close();
 
-	    } catch (Exception e) {
-	           e.printStackTrace();
-	    }
+	    return file.getAbsolutePath();
 	}
 	
 	
