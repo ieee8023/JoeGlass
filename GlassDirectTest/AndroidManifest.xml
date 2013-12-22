@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.glassdirecttest"
+    package="the.joeglass"
     android:versionCode="1"
     android:versionName="1.0" >
 
@@ -14,7 +14,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name="com.example.glassdirecttest.MainActivity"
+            android:name="the.joeglass.MainActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -23,7 +23,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.example.glassdirecttest.SendToGlass"
+            android:name="the.joeglass.SendToGlass"
             android:label="@string/title_activity_send_to_glass" >
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
@@ -40,13 +40,12 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.example.glassdirecttest.ErrorActivity"
+            android:name="the.joeglass.ErrorActivity"
             android:label="@string/title_activity_error" >
         </activity>
     </application>
 
     <uses-permission android:name="android.permission.BLUETOOTH" />
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" /> 
 
 </manifest>

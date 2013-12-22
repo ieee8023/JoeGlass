@@ -1,4 +1,4 @@
-package com.example.glassdirecttest;
+package the.joeglass;
 
 import java.io.File;
 import java.io.FileOutputStream;

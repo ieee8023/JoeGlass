@@ -1,4 +1,4 @@
-package com.example.glassdirecttest;
+package the.joeglass;
 
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
