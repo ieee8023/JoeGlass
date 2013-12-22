@@ -63,32 +63,7 @@ public class GlassConnection {
         mGlassReaderThread.start();
         
         
-        // handshaking
-        Envelope envelope = CompanionMessagingUtil.newEnvelope();
-        envelope.timezoneC2G = TimeZone.getDefault().getID();
-        write(envelope);
-
-        try {
-            Thread.sleep(300);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        // handshaking
-        Envelope envelope2 = CompanionMessagingUtil.newEnvelope();
-        GlassInfoRequest glassInfoRequest = new GlassInfoRequest();
-        glassInfoRequest.requestBatteryLevel = true;
-        glassInfoRequest.requestStorageInfo = true;
-        glassInfoRequest.requestDeviceName = true;
-        envelope2.glassInfoRequestC2G = glassInfoRequest;
-        write(envelope2);
-
-        try {
-            Thread.sleep(300);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
+        handshake();
         
         //tell the people!
         synchronized (mListeners) {
@@ -262,6 +237,41 @@ public class GlassConnection {
 //        }
 //    }
 
+    
+    public void handshake(){
+    	
+    	
+        // handshaking
+        Envelope envelope = CompanionMessagingUtil.newEnvelope();
+        envelope.timezoneC2G = TimeZone.getDefault().getID();
+        write(envelope);
+
+        try {
+            Thread.sleep(300);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        // handshaking
+        Envelope envelope2 = CompanionMessagingUtil.newEnvelope();
+        GlassInfoRequest glassInfoRequest = new GlassInfoRequest();
+        glassInfoRequest.requestBatteryLevel = true;
+        glassInfoRequest.requestStorageInfo = true;
+        glassInfoRequest.requestDeviceName = true;
+        envelope2.glassInfoRequestC2G = glassInfoRequest;
+        write(envelope2);
+
+        try {
+            Thread.sleep(300);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    	
+    	
+    	
+    }
+    
+    
     public void write(Envelope envelope) {
         synchronized (STREAM_WRITE_LOCK) {
             try {

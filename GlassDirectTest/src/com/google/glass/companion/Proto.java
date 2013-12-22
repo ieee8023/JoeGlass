@@ -2,7 +2,7 @@
 
 package com.google.glass.companion;
 
-@SuppressWarnings("hiding")
+
 public interface Proto {
   
   public static final class Envelope extends

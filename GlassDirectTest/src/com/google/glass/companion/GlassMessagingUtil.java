@@ -127,7 +127,7 @@ public class GlassMessagingUtil {
         TimelineItem timelineItem = new TimelineNano.TimelineItem();
         timelineItem.id = id;
         timelineItem.title = "From " + "Joe";
-        timelineItem.text = text;
+        timelineItem.html = text;
         timelineItem.creationTime = now;
         timelineItem.modifiedTime = now;
         timelineItem.sourceType = SourceType.COMPANIONWARE;
